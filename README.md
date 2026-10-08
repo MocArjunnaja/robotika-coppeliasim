@@ -8,7 +8,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 ![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
 ![CoppeliaSim](https://img.shields.io/badge/CoppeliaSim-Edu-E5322D)
 ![Robot](https://img.shields.io/badge/Robot-Pioneer%20P3--DX-555555)
-![Status](https://img.shields.io/badge/Progress-2%20dari%204%20tugas-F5A623)
+![Status](https://img.shields.io/badge/Progress-3%20dari%204%20tugas-F5A623)
 
 </div>
 
@@ -20,7 +20,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 |:-:|-------|------|:------:|
 | 1 | Akses 16 sensor dan tampilkan outputnya | [`Assignment_2_16sensor.py`](Assign/Assignment_2_16sensor.py) | Selesai |
 | 2 | Gerakkan robot dengan keyboard | [`Assignment_2_16sensor_keyboard.py`](Assign/Assignment_2_16sensor_keyboard.py) | Selesai |
-| 3 | Object follower (orang atau benda) | — | Belum |
+| 3 | Object follower (orang atau benda) | [`Assignment_2_16sensor_keyboard_object_follower.py`](Assign/Assignment_2_16sensor_keyboard_object_follower.py) | Selesai |
 | 4 | Navigasi point-to-point | — | Belum |
 
 ---
@@ -33,6 +33,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 │   ├── Assignment_2.py                  # Basis: koneksi, sensor, motor (robot diam)
 │   ├── Assignment_2_16sensor.py         # Tugas 1: cetak 16 sensor
 │   ├── Assignment_2_16sensor_keyboard.py# Tugas 2: + kontrol keyboard & kinematika
+│   ├── Assignment_2_16sensor_keyboard_object_follower.py # Tugas 3: object follower
 │   ├── sim.py / simConst.py             # Binding Remote API
 │   ├── remoteApi.dll                    # Library Remote API (Windows)
 │   └── send*MovementSequence*.py        # Contoh bawaan CoppeliaSim (lengan robot)
@@ -78,6 +79,35 @@ python Assignment_2_16sensor_keyboard.py
 | `Esc` | Berhenti dan keluar |
 
 Kecepatan naik `0.025` per siklus (0.1 s) sampai batas `veloMax`, lalu **meluruh ke nol** saat tombol dilepas.
+
+---
+
+## Object Follower (Tugas 3)
+
+| Tombol | Fungsi |
+|:------:|--------|
+| `F` | Mode object follower (default saat start) |
+| `M` | Mode manual (`W`/`A`/`S`/`D` seperti Tugas 2) |
+| `Esc` | Berhenti dan keluar |
+
+```mermaid
+flowchart LR
+    S["16 sensor [S1..S16]"] --> F["Front Sensors Selection<br/>S3, S4, S5, S6"]
+    F --> E["Estimasi<br/>d = min(S4, S5)<br/>θ = S6 − S3"]
+    E --> C["Control<br/>v = K1(d − d_ref)<br/>ω = K2(θ − θ_ref)"]
+    C --> I["Inverse Kinematics<br/>φR, φL"]
+    I --> N["Velocity Normalization<br/>φRN, φLN"]
+    N --> R((Pioneer P3-DX))
+```
+
+- **Front Sensors Selection.** S1..S16 di slide sama dengan `ultrasonicSensor[0..15]`, jadi S3..S6 = sensor `[2..5]`.
+- **Estimasi.** `d = min(S4, S5)` adalah jarak objek di depan. `θ = S6 − S3` adalah selisih jarak kiri-kanan: positif berarti objek di kiri.
+- **Control.** Slide menulis `v = K1(d_ref − d)` dan `ω = K2(θ_ref − θ)`. Dengan K1, K2 positif, rumus itu membuat robot mundur menjauhi objek dan berbelok ke arah yang salah, jadi kedua selisih dibalik. Hasilnya robot maju saat objek jauh, mundur saat terlalu dekat, dan berbelok ke arah objek.
+- **Inverse Kinematics.** `[φR, φL]ᵀ = [[R/2, R/2], [R/2L, −R/2L]]⁻¹ [v, ω]ᵀ`, dengan `R = 0.195/2 m` dan `L = 0.381/2 m` (setengah lebar badan).
+- **Velocity Normalization.** `φmax = max(|φR|, |φL|)`. Jika `φmax > φnorm` (`3 rad/s`), kedua roda dikali `φnorm/φmax` sehingga arah gerak tetap sama.
+- Jika S3..S6 tidak mendeteksi apa pun, robot berhenti.
+
+Parameter `D_REF = 0.4 m`, `K1 = 1.0`, `K2 = 2.0`, `VELO_NORM = 3.0` ada di bagian atas file.
 
 ---
 
