@@ -8,7 +8,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 ![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
 ![CoppeliaSim](https://img.shields.io/badge/CoppeliaSim-Edu-E5322D)
 ![Robot](https://img.shields.io/badge/Robot-Pioneer%20P3--DX-555555)
-![Status](https://img.shields.io/badge/Progress-3%20dari%204%20tugas-F5A623)
+![Status](https://img.shields.io/badge/Progress-4%20dari%204%20tugas-2EA44F)
 
 </div>
 
@@ -21,7 +21,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 | 1 | Akses 16 sensor dan tampilkan outputnya | [`Assignment_2_16sensor.py`](Assign/Assignment_2_16sensor.py) | Selesai |
 | 2 | Gerakkan robot dengan keyboard | [`Assignment_2_16sensor_keyboard.py`](Assign/Assignment_2_16sensor_keyboard.py) | Selesai |
 | 3 | Object follower (orang atau benda) | [`Assignment_2_16sensor_keyboard_object_follower.py`](Assign/Assignment_2_16sensor_keyboard_object_follower.py) | Selesai |
-| 4 | Navigasi point-to-point | — | Belum |
+| 4 | Navigasi point-to-point (6 Disc berurutan) | [`Assignment_2_point_to_point.py`](Assign/Assignment_2_point_to_point.py) | Selesai |
 
 ---
 
@@ -34,6 +34,7 @@ baca 16 sensor ultrasonik, kemudi dengan keyboard, dan seterusnya.
 │   ├── Assignment_2_16sensor.py         # Tugas 1: cetak 16 sensor
 │   ├── Assignment_2_16sensor_keyboard.py# Tugas 2: + kontrol keyboard & kinematika
 │   ├── Assignment_2_16sensor_keyboard_object_follower.py # Tugas 3: object follower
+│   ├── Assignment_2_point_to_point.py   # Tugas 4: navigasi ke Disc[0]..Disc[5]
 │   ├── sim.py / simConst.py             # Binding Remote API
 │   ├── remoteApi.dll                    # Library Remote API (Windows)
 │   └── send*MovementSequence*.py        # Contoh bawaan CoppeliaSim (lengan robot)
@@ -108,6 +109,37 @@ flowchart LR
 - Jika S3..S6 tidak mendeteksi apa pun, robot berhenti.
 
 Parameter `D_REF = 0.4 m`, `K1 = 0.5`, `K2 = 0.5`, `VELO_NORM = 1.5`, `NO_DETECTION = 1.0` ada di bagian atas file.
+
+---
+
+## Navigasi Point-to-Point (Tugas 4)
+
+Robot mendatangi `Disc[0]` → `Disc[1]` → … → `Disc[5]` secara berurutan, lalu berhenti. Tekan `Esc` untuk keluar.
+
+```mermaid
+flowchart LR
+    D["Disc[i]<br/>x_ref, y_ref, γ_ref"] --> E["e_x, e_y, e_γ"]
+    L["Robot Localization<br/>x_act, y_act, γ_act"] --> E
+    E --> P["Pose Control<br/>ẋc, ẏc, γ̇c"]
+    P --> W["Wheel Velocity Generator<br/>φR, φL"]
+    W --> N["Velocity Normalization<br/>φRN, φLN"]
+    N --> R((Pioneer P3-DX))
+    R --> L
+```
+
+- **Robot Localization.** Posisi dan yaw `/PioneerP3DX` serta `/Disc[i]` dibaca dengan `simxGetObjectPosition` / `simxGetObjectOrientation` (frame world).
+- **Pose Control.** `θ = atan2(e_y, e_x)`.
+  - Di luar toleransi: `ẋc = K1·e_x`, `ẏc = K2·e_y`, `γ̇c = θ − γ_act`.
+  - Di dalam toleransi posisi (`|e_x|, |e_y| ≤ e_tol`): robot berhenti translasi dan hanya memutar badan, `γ̇c = K3·e_γ`.
+- **Wheel Velocity Generator.** `[φR, φL]ᵀ = pinv([[R/2·cosθ, R/2·cosθ], [R/2·sinθ, R/2·sinθ], [R/2L, −R/2L]]) · [ẋc, ẏc, γ̇c]ᵀ`.
+- **Velocity Normalization.** Sama seperti Tugas 3, memakai `max(|φR|, |φL|)`.
+- Disc dianggap tercapai jika `|e_x|, |e_y| ≤ 0.05 m` dan `|e_γ| ≤ 0.05 rad`, lalu target pindah ke Disc berikutnya.
+
+Dua perbedaan dari kode dosen:
+- `atan2` dipakai sebagai pengganti `atan(e_y/e_x)`, supaya arah benar di keempat kuadran dan tidak ada pembagian dengan nol.
+- Selisih sudut dibungkus ke `[−π, π]`, supaya robot selalu berputar lewat jalur terpendek.
+
+Parameter `DISC_NAMES`, `K1`, `K2`, `K3`, `E_TOL`, `GAMMA_TOL`, `VELO_NORM` ada di bagian atas file.
 
 ---
 
