@@ -114,7 +114,7 @@ Parameter `D_REF = 0.4 m`, `K1 = 0.5`, `K2 = 0.5`, `VELO_NORM = 1.5`, `NO_DETECT
 
 ## Navigasi Point-to-Point (Tugas 4)
 
-Robot mendatangi `Disc[0]` → `Disc[1]` → … → `Disc[5]` secara berurutan, lalu berhenti. Tekan `Esc` untuk keluar.
+Robot mendatangi `Disc[0]` → `Disc[1]` → … → `Disc[5]` secara berurutan. Dengan `LOOP_WAYPOINTS = True` (default) robot kembali ke `Disc[0]` dan berputar terus; dengan `False` robot berhenti di Disc terakhir. Tekan `Esc` untuk keluar.
 
 ```mermaid
 flowchart LR
@@ -139,7 +139,7 @@ Dua perbedaan dari kode dosen:
 - `atan2` dipakai sebagai pengganti `atan(e_y/e_x)`, supaya arah benar di keempat kuadran dan tidak ada pembagian dengan nol.
 - Selisih sudut dibungkus ke `[−π, π]`, supaya robot selalu berputar lewat jalur terpendek.
 
-Parameter `DISC_NAMES`, `K1`, `K2`, `K3`, `E_TOL`, `GAMMA_TOL`, `VELO_NORM` ada di bagian atas file.
+Parameter `DISC_NAMES`, `LOOP_WAYPOINTS`, `K1`, `K2`, `K3`, `E_TOL`, `GAMMA_TOL`, `VELO_NORM` ada di bagian atas file.
 
 ---
 

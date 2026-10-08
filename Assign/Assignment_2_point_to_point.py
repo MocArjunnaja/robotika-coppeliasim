@@ -7,6 +7,7 @@ import numpy as np
 
 # Waypoints visited in this order (object alias in CoppeliaSim scene)
 DISC_NAMES = ['/Disc[0]', '/Disc[1]', '/Disc[2]', '/Disc[3]', '/Disc[4]', '/Disc[5]']
+LOOP_WAYPOINTS = True   # True: after the last Disc go back to the first one; False: stop
 K1 = 0.5            # gain e_x
 K2 = 0.5            # gain e_y
 K3 = 0.5            # gain e_gamma (final orientation)
@@ -116,7 +117,7 @@ def velocityNormalization(veloAng, veloNorm):
 
 
 print('Program started')
-print('Waypoints:', DISC_NAMES, ' [Esc] quit')
+print('Waypoints:', DISC_NAMES, ' loop =', LOOP_WAYPOINTS, ' [Esc] quit')
 client_id = connectSimulator()
 motors_handle = getMotorHandle(client_id)
 robot_handle = getRobotHandle(client_id)
@@ -160,8 +161,12 @@ while (True):
                     print('Reached', DISC_NAMES[target])
                     target += 1
                     if target >= len(DISC_NAMES):
-                        setRobotMotion(client_id,motors_handle,velo_ang_zero)
-                        print('All waypoints reached. Press [Esc] to quit.')
+                        if LOOP_WAYPOINTS:
+                            target = 0
+                            print('All waypoints reached, looping back to', DISC_NAMES[target])
+                        else:
+                            setRobotMotion(client_id,motors_handle,velo_ang_zero)
+                            print('All waypoints reached. Press [Esc] to quit.')
     if keyboard.is_pressed('esc'):
         setRobotMotion(client_id,motors_handle,velo_ang_zero)
         break
