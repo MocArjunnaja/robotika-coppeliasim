@@ -104,10 +104,10 @@ flowchart LR
 - **Estimasi.** `d = min(S4, S5)` adalah jarak objek di depan. `θ = S6 − S3` adalah selisih jarak kiri-kanan: positif berarti objek di kiri.
 - **Control.** Slide menulis `v = K1(d_ref − d)` dan `ω = K2(θ_ref − θ)`. Dengan K1, K2 positif, rumus itu membuat robot mundur menjauhi objek dan berbelok ke arah yang salah, jadi kedua selisih dibalik. Hasilnya robot maju saat objek jauh, mundur saat terlalu dekat, dan berbelok ke arah objek.
 - **Inverse Kinematics.** `[φR, φL]ᵀ = [[R/2, R/2], [R/2L, −R/2L]]⁻¹ [v, ω]ᵀ`, dengan `R = 0.195/2 m` dan `L = 0.381/2 m` (setengah lebar badan).
-- **Velocity Normalization.** `φmax = max(|φR|, |φL|)`. Jika `φmax > φnorm` (`3 rad/s`), kedua roda dikali `φnorm/φmax` sehingga arah gerak tetap sama.
+- **Velocity Normalization.** `φmax = max(|φR|, |φL|)`. Jika `φmax > φnorm` (`1.5 rad/s`), kedua roda dikali `φnorm/φmax` sehingga arah gerak tetap sama.
 - Jika S3..S6 tidak mendeteksi apa pun, robot berhenti.
 
-Parameter `D_REF = 0.4 m`, `K1 = 1.0`, `K2 = 2.0`, `VELO_NORM = 3.0` ada di bagian atas file.
+Parameter `D_REF = 0.4 m`, `K1 = 0.5`, `K2 = 0.5`, `VELO_NORM = 1.5`, `NO_DETECTION = 1.0` ada di bagian atas file.
 
 ---
 

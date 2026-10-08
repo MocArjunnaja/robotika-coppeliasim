@@ -4,12 +4,12 @@ import time
 import keyboard
 import numpy as np
 
-NO_DETECTION = 2.0  # distance value when sensor detects nothing (m)
+NO_DETECTION = 1.0  # distance value when sensor detects nothing (m)
 D_REF = 0.4         # desired distance to object (m)
 THETA_REF = 0.      # desired orientation: object right in front (S3 = S6)
-K1 = 1.0            # distance gain
-K2 = 2.0            # orientation gain
-VELO_NORM = 3.0     # max wheel angular velocity after normalization (rad/s)
+K1 = 0.5            # distance gain
+K2 = 0.5            # orientation gain
+VELO_NORM = 1.5     # max wheel angular velocity after normalization (rad/s)
 
 def connectSimulator():
     sim.simxFinish(-1)
